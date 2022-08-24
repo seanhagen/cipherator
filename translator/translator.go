@@ -2,17 +2,13 @@ package translator
 
 import (
 	"strings"
+	"unicode"
 )
 
 const (
-	vowels          = "aeiou"
-	consonantAppend = "ay"
-	vowelAppend     = "way"
-)
-
-var (
-	conAppend = strings.Split(consonantAppend, "")
-	vowAppend = strings.Split(vowelAppend, "")
+	vowels    = "aeiou"
+	conAppend = "ay"
+	vowAppend = "way"
 )
 
 // PigLatin ...
@@ -25,10 +21,9 @@ func NewPigLatin() (*PigLatin, error) {
 
 // Translate ...
 func (pl PigLatin) Translate(input string) (string, error) {
-	var output, currentWord []string
-	data := strings.Split(input, "")
+	var output, currentWord []rune
 
-	for _, ch := range data {
+	for _, ch := range input {
 		// if it's a letter, append to currentWord
 		if pl.isLetter(ch) {
 			currentWord = append(currentWord, ch)
@@ -52,27 +47,32 @@ func (pl PigLatin) Translate(input string) (string, error) {
 		output = append(output, ch)
 
 		// and reset currentWord to an empty slice
-		currentWord = []string{}
+		currentWord = []rune{}
 	}
 
 	currentWord = pl.doTranslation(currentWord)
 	output = append(output, currentWord...)
 
-	return strings.Join(output, ""), nil
+	outWr := strings.Builder{}
+	for _, r := range output {
+		outWr.WriteRune(r)
+	}
+
+	return outWr.String(), nil
 }
 
 // doTranslation ...
-func (pl PigLatin) doTranslation(in []string) []string {
+func (pl PigLatin) doTranslation(in []rune) []rune {
 	if len(in) == 0 {
 		return in
 	}
 
 	if pl.isUpper(in[0]) {
-		in[0] = strings.ToLower(in[0])
-		in[1] = strings.ToUpper(in[1])
+		in[0] = unicode.ToLower(in[0])
+		in[1] = unicode.ToUpper(in[1])
 	}
 
-	var toAppend []string
+	var toAppend string
 
 	if pl.isVowel(in[0]) {
 		toAppend = vowAppend
@@ -81,37 +81,38 @@ func (pl PigLatin) doTranslation(in []string) []string {
 		in = append(in[1:], in[0])
 	}
 
-	in = append(in, toAppend...)
-
+	for _, r := range toAppend {
+		in = append(in, r)
+	}
 	return in
 }
 
 // isLetter ...
-func (pl PigLatin) isLetter(in string) bool {
-	if in >= "a" && in <= "z" || in >= "A" && in <= "Z" {
-		return true
-	}
-	return false
+func (pl PigLatin) isLetter(in rune) bool {
+	return unicode.IsLetter(in)
 }
 
 // isVowel  ...
-func (pl PigLatin) isVowel(in string) bool {
-	if in == "" {
-		return false
+func (pl PigLatin) isVowel(in rune) bool {
+	for _, v := range vowels {
+		if in == v {
+			return true
+		}
 	}
-	return strings.Contains(vowels, in)
+
+	return false
 }
 
 // isUpper ...
-func (pl PigLatin) isUpper(in string) bool {
+func (pl PigLatin) isUpper(in rune) bool {
 	if !pl.isLetter(in) {
 		return false
 	}
 
-	return in == strings.ToUpper(in)
+	return unicode.IsUpper(in)
 }
 
 // isSpace  ...
-func (pl PigLatin) isSpace(in string) bool {
-	return in == " "
+func (pl PigLatin) isSpace(in rune) bool {
+	return unicode.IsSpace(in)
 }

@@ -44,15 +44,14 @@ func TestTranslator_Words(t *testing.T) {
 
 func TestTranslator_IsLetter(t *testing.T) {
 	tests := []struct {
-		input  string
+		input  rune
 		expect bool
 	}{
-		{"a", true},
-		{"B", true},
-		{"", false},
-		{" ", false},
-		{"!", false},
-		{"1", false},
+		{'a', true},
+		{'B', true},
+		{' ', false},
+		{'!', false},
+		{'1', false},
 	}
 
 	pl, err := NewPigLatin()
@@ -60,23 +59,22 @@ func TestTranslator_IsLetter(t *testing.T) {
 	assert.NoError(t, err)
 
 	for _, tt := range tests {
-		t.Run(fmt.Sprintf("%v is letter %v", tt.input, tt.expect), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%c is letter %v", tt.input, tt.expect), func(t *testing.T) {
 			got := pl.isLetter(tt.input)
-			assert.Equal(t, tt.expect, got, "isLetter(%v)", tt.input)
+			assert.Equal(t, tt.expect, got, "isLetter(%c)", tt.input)
 		})
 	}
 }
 
 func TestTranslator_IsSpace(t *testing.T) {
 	tests := []struct {
-		input  string
+		input  rune
 		expect bool
 	}{
-		{" ", true},
-		{"", false},
-		{"a", false},
-		{"1", false},
-		{"!", false},
+		{' ', true},
+		{'a', false},
+		{'1', false},
+		{'!', false},
 	}
 
 	pl, err := NewPigLatin()
@@ -84,28 +82,27 @@ func TestTranslator_IsSpace(t *testing.T) {
 	assert.NoError(t, err)
 
 	for _, tt := range tests {
-		t.Run(fmt.Sprintf("%v is letter %v", tt.input, tt.expect), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%c is letter %v", tt.input, tt.expect), func(t *testing.T) {
 			got := pl.isSpace(tt.input)
-			assert.Equal(t, tt.expect, got, "isSpace('%v')", tt.input)
+			assert.Equal(t, tt.expect, got, "isSpace('%c')", tt.input)
 		})
 	}
 }
 
 func TestTranslator_IsVowel(t *testing.T) {
 	tests := []struct {
-		input  string
+		input  rune
 		expect bool
 	}{
-		{"a", true},
-		{"e", true},
-		{"i", true},
-		{"o", true},
-		{"u", true},
-		{"y", false},
-		{"b", false},
-		{"!", false},
-		{" ", false},
-		{"", false},
+		{'a', true},
+		{'e', true},
+		{'i', true},
+		{'o', true},
+		{'u', true},
+		{'y', false},
+		{'b', false},
+		{'!', false},
+		{' ', false},
 	}
 
 	pl, err := NewPigLatin()
@@ -113,23 +110,22 @@ func TestTranslator_IsVowel(t *testing.T) {
 	assert.NoError(t, err)
 
 	for _, tt := range tests {
-		t.Run(fmt.Sprintf("%v is vowel %v", tt.input, tt.expect), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%c is vowel %v", tt.input, tt.expect), func(t *testing.T) {
 			got := pl.isVowel(tt.input)
-			assert.Equal(t, tt.expect, got, "isVowel('%v')", tt.input)
+			assert.Equal(t, tt.expect, got, "isVowel('%c')", tt.input)
 		})
 	}
 }
 
 func TestTranslator_IsUpper(t *testing.T) {
 	tests := []struct {
-		input  string
+		input  rune
 		expect bool
 	}{
-		{"A", true},
-		{"a", false},
-		{"!", false},
-		{" ", false},
-		{"", false},
+		{'A', true},
+		{'a', false},
+		{'!', false},
+		{' ', false},
 	}
 
 	pl, err := NewPigLatin()
@@ -146,12 +142,12 @@ func TestTranslator_IsUpper(t *testing.T) {
 
 func TestTranslator_DoTranslation(t *testing.T) {
 	tests := []struct {
-		input  []string
-		expect []string
+		input  []rune
+		expect []rune
 	}{
-		{[]string{"h", "e", "l", "l", "o"}, []string{"e", "l", "l", "o", "h", "a", "y"}},
-		{[]string{"H", "e", "l", "l", "o"}, []string{"E", "l", "l", "o", "h", "a", "y"}},
-		{[]string{"e", "a", "t"}, []string{"e", "a", "t", "w", "a", "y"}},
+		{[]rune{'h', 'e', 'l', 'l', 'o'}, []rune{'e', 'l', 'l', 'o', 'h', 'a', 'y'}},
+		{[]rune{'H', 'e', 'l', 'l', 'o'}, []rune{'E', 'l', 'l', 'o', 'h', 'a', 'y'}},
+		{[]rune{'e', 'a', 't'}, []rune{'e', 'a', 't', 'w', 'a', 'y'}},
 	}
 
 	pl, err := NewPigLatin()
@@ -159,9 +155,9 @@ func TestTranslator_DoTranslation(t *testing.T) {
 	assert.NoError(t, err)
 
 	for _, tt := range tests {
-		t.Run(fmt.Sprintf("converting '%v' to '%v'", tt.input, tt.expect), func(t *testing.T) {
+		t.Run(fmt.Sprintf("converting '%c' to '%c'", tt.input, tt.expect), func(t *testing.T) {
 			got := pl.doTranslation(tt.input)
-			assert.Equal(t, tt.expect, got, "doTranslation(%v)", tt.input)
+			assert.Equal(t, tt.expect, got, "doTranslation(%c)", tt.input)
 		})
 	}
 }
