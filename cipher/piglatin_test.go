@@ -1,4 +1,4 @@
-package translator
+package cipher
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTranslator_Basics(t *testing.T) {
+func TestPigLatin_Basics(t *testing.T) {
 	var pl *PigLatin
 	var err error
 
@@ -16,7 +16,7 @@ func TestTranslator_Basics(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestTranslator_Words(t *testing.T) {
+func TestPigLatin_Words(t *testing.T) {
 	tests := []struct {
 		input, output string
 	}{
@@ -35,14 +35,14 @@ func TestTranslator_Words(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v to %v", tt.input, tt.output), func(t *testing.T) {
-			got, err := pl.Translate(tt.input)
+			got, err := pl.Encode(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.output, got)
 		})
 	}
 }
 
-func TestTranslator_IsLetter(t *testing.T) {
+func TestPigLatin_IsLetter(t *testing.T) {
 	tests := []struct {
 		input  rune
 		expect bool
@@ -66,7 +66,7 @@ func TestTranslator_IsLetter(t *testing.T) {
 	}
 }
 
-func TestTranslator_IsSpace(t *testing.T) {
+func TestPigLatin_IsSpace(t *testing.T) {
 	tests := []struct {
 		input  rune
 		expect bool
@@ -89,7 +89,7 @@ func TestTranslator_IsSpace(t *testing.T) {
 	}
 }
 
-func TestTranslator_IsVowel(t *testing.T) {
+func TestPigLatin_IsVowel(t *testing.T) {
 	tests := []struct {
 		input  rune
 		expect bool
@@ -117,7 +117,7 @@ func TestTranslator_IsVowel(t *testing.T) {
 	}
 }
 
-func TestTranslator_IsUpper(t *testing.T) {
+func TestPigLatin_IsUpper(t *testing.T) {
 	tests := []struct {
 		input  rune
 		expect bool
@@ -140,7 +140,7 @@ func TestTranslator_IsUpper(t *testing.T) {
 	}
 }
 
-func TestTranslator_DoTranslation(t *testing.T) {
+func TestPigLatin_DoTranslation(t *testing.T) {
 	tests := []struct {
 		input  []rune
 		expect []rune
@@ -156,7 +156,7 @@ func TestTranslator_DoTranslation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("converting '%c' to '%c'", tt.input, tt.expect), func(t *testing.T) {
-			got := pl.doTranslation(tt.input)
+			got := pl.encodeRunes(tt.input)
 			assert.Equal(t, tt.expect, got, "doTranslation(%c)", tt.input)
 		})
 	}
