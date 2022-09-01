@@ -86,3 +86,72 @@ func TestRot13_Cipher_ObjEncode(t *testing.T) {
 		})
 	}
 }
+
+func TestRot13_EncodeFromRunes(t *testing.T) {
+	tests := []struct {
+		input, expect string
+	}{
+		{"hello world", "uryyb jbeyq"},
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("test %v encodeFromBytes %v", i, tt.input), func(t *testing.T) {
+			out := bytes.NewBuffer(nil)
+			rt, err := New(out)
+			require.NoError(t, err)
+
+			r := strings.NewReader(tt.input)
+
+			err = rt.encodeFromRunes(r)
+			require.NoError(t, err)
+
+			assert.Equal(t, tt.expect, out.String())
+		})
+	}
+}
+
+func TestRot13_EncodeFromBytes(t *testing.T) {
+	tests := []struct {
+		input, expect string
+	}{
+		{"hello world", "uryyb jbeyq"},
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("test %v encodeFromBytes %v", i, tt.input), func(t *testing.T) {
+			out := bytes.NewBuffer(nil)
+			rt, err := New(out)
+			require.NoError(t, err)
+
+			r := strings.NewReader(tt.input)
+
+			err = rt.encodeFromBytes(r)
+			require.NoError(t, err)
+
+			assert.Equal(t, tt.expect, out.String())
+		})
+	}
+}
+
+func TestRot13_EncodeFromReader(t *testing.T) {
+	tests := []struct {
+		input, expect string
+	}{
+		{"hello world", "uryyb jbeyq"},
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("test %v encodeFromBytes %v", i, tt.input), func(t *testing.T) {
+			out := bytes.NewBuffer(nil)
+			rt, err := New(out)
+			require.NoError(t, err)
+
+			r := strings.NewReader(tt.input)
+
+			err = rt.encodeFromReader(r)
+			require.NoError(t, err)
+
+			assert.Equal(t, tt.expect, out.String())
+		})
+	}
+}

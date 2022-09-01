@@ -42,7 +42,7 @@ func (e *Encoder) Encode(r io.Reader) error {
 	// fmt.Printf("reader: %v\n", spew.Sdump(r))
 
 	if rr, ok := r.(io.RuneReader); ok {
-		return e.encodeRunes(rr)
+		return e.encodeFromRunes(rr)
 	}
 
 	if rr, ok := r.(io.ByteReader); ok {
@@ -52,8 +52,8 @@ func (e *Encoder) Encode(r io.Reader) error {
 	return e.encodeFromReader(r)
 }
 
-// encodeRunes ...
-func (e *Encoder) encodeRunes(rr io.RuneReader) error {
+// encodeFromRunes ...
+func (e *Encoder) encodeFromRunes(rr io.RuneReader) error {
 	for {
 		r, _, err := rr.ReadRune()
 		if err == io.EOF {
@@ -74,6 +74,8 @@ func (e *Encoder) encodeRunes(rr io.RuneReader) error {
 
 // encodeFromBytes ...
 func (e *Encoder) encodeFromBytes(rr io.ByteReader) error {
+	buf := []byte{}
+
 	for {
 		b, err := rr.ReadByte()
 		if err == io.EOF {
@@ -82,10 +84,19 @@ func (e *Encoder) encodeFromBytes(rr io.ByteReader) error {
 		if err != nil {
 			return fmt.Errorf("unable to read next byte: %w", err)
 		}
-		_, err = e.wr.Write([]byte{b})
+
+		buf = append(buf, b)
+		r, s := utf8.DecodeRune(buf)
+		if r == utf8.RuneError && s == 0 {
+			continue
+		}
+
+		out := utf8.AppendRune(nil, rot13(r))
+		_, err = e.wr.Write(out)
 		if err != nil {
 			return fmt.Errorf("unable to write byte to output: %w", err)
 		}
+		buf = []byte{}
 	}
 	return nil
 }
@@ -125,31 +136,7 @@ func (e *Encoder) encodeFromReader(r io.Reader) error {
 	}
 
 	return nil
-
 }
-
-// func (rt rot13Transform) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err error) {
-// 	if atEOF || len(src) == 0 {
-// 		return 0, 0, nil
-// 	}
-
-// 	fmt.Printf("Transform('%s', '%s', %v)\n", dst, src, atEOF)
-
-// 	countIn, countOut := 0, 0
-
-// 	for len(src) > 0 {
-// 		r, s := utf8.DecodeRune(src)
-
-// 		r = rot13(r)
-
-// 		dst = utf8.AppendRune(dst, r)
-// 		countIn += s
-// 		countOut += s
-// 		src = src[s:]
-// 	}
-
-// 	return countOut, countIn, nil
-// }
 
 // shamelessly ripped from https://stackoverflow.com/questions/31669266/tour-of-go-exercise-23-rot13reader
 func rot13(r rune) rune {
