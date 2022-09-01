@@ -33,17 +33,14 @@ func Encode(in string) (string, error) {
 
 // EncodeTo  ...
 func EncodeTo(in string, wr io.Writer) error {
-	pl, err := New(wr)
-	if err != nil {
-		return err
-	}
+	pl := &Encoder{wr}
 	return pl.EncodeFromString(in)
 }
 
 // EncodeFromString  ...
 func (spl *Encoder) EncodeFromString(in string) error {
 	read := strings.NewReader(in)
-	return spl.readInto(read, spl.output)
+	return spl.Encode(read)
 }
 
 // Encode  ...
