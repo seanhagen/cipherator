@@ -39,8 +39,6 @@ func (e *Encoder) EncodeFromString(in string) error {
 
 // Encode ...
 func (e *Encoder) Encode(r io.Reader) error {
-	// fmt.Printf("reader: %v\n", spew.Sdump(r))
-
 	if rr, ok := r.(io.RuneReader); ok {
 		return e.encodeFromRunes(rr)
 	}
