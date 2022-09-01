@@ -13,15 +13,15 @@ import (
 const (
 	// EncoderTypePiglatin is a EncoderType of type Piglatin.
 	EncoderTypePiglatin EncoderType = iota
-	// EncoderTypeReverse is a EncoderType of type Reverse.
-	EncoderTypeReverse
+	// EncoderTypeRot13 is a EncoderType of type Rot13.
+	EncoderTypeRot13
 )
 
-const _EncoderTypeName = "piglatinreverse"
+const _EncoderTypeName = "piglatinrot13"
 
 var _EncoderTypeMap = map[EncoderType]string{
 	EncoderTypePiglatin: _EncoderTypeName[0:8],
-	EncoderTypeReverse:  _EncoderTypeName[8:15],
+	EncoderTypeRot13:    _EncoderTypeName[8:13],
 }
 
 // String implements the Stringer interface.
@@ -34,7 +34,7 @@ func (x EncoderType) String() string {
 
 var _EncoderTypeValue = map[string]EncoderType{
 	_EncoderTypeName[0:8]:  EncoderTypePiglatin,
-	_EncoderTypeName[8:15]: EncoderTypeReverse,
+	_EncoderTypeName[8:13]: EncoderTypeRot13,
 }
 
 // ParseEncoderType attempts to convert a string to a EncoderType.
