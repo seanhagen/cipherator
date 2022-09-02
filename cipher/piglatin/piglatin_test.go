@@ -20,76 +20,76 @@ func TestPigLatin_Basics(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestPigLatin_Methods(t *testing.T) {
-	input := "hello world"
-	expect := "ellohay orldway"
-
-	got, err := Encode(input)
-	require.NoError(t, err)
-	assert.Equal(t, expect, got, "Encode(string)")
-
-	buf := bytes.NewBuffer(nil)
-	err = EncodeTo(input, buf)
-	require.NoError(t, err)
-	assert.Equal(t, expect, buf.String(), "EncodeTo(string, io.Writer)")
-
-	buf.Reset()
-	pl, err := New(buf)
-	require.NoError(t, err)
-	require.NotNil(t, pl)
-
-	err = pl.EncodeFromString(input)
-	assert.NoError(t, err)
-	assert.Equal(t, expect, buf.String(), "(*PigLatin).EncodeFromString(string)")
-
-	buf.Reset()
-	pl, err = New(buf)
-	require.NoError(t, err)
-	require.NotNil(t, pl)
-	read := strings.NewReader(input)
-	err = pl.Encode(read)
-	assert.NoError(t, err)
-	assert.Equal(t, expect, buf.String(), "(*PigLatin).Encode(io.Reader)")
-}
-
-func TestPigLatin_Writer(t *testing.T) {
-	input := "hello world"
-	expect := "ellohay orldway"
-
-	inRead := strings.NewReader(input)
-	output := bytes.NewBuffer(nil)
-
-	pl, err := New(output)
-	require.NotNil(t, pl)
-	require.NoError(t, err)
-
-	err = pl.Encode(inRead)
-	require.NoError(t, err)
-
-	assert.Equal(t, expect, output.String())
-}
-
-func TestPigLatin_Words(t *testing.T) {
+func TestPigLatinEncoding(t *testing.T) {
 	tests := []struct {
-		input, output string
+		input, expect string
 	}{
-		{"hello", "ellohay"},
-		{"eat", "eatway"},
-		{"world", "orldway"},
-		{"apples", "applesway"},
-		{"hello world", "ellohay orldway"},
-		{"Hello world", "Ellohay orldway"},
-		{"Hello, world!", "Ellohay, orldway!"},
-		// add test cases for the weird edge cases -- single letter words like "I" or "a", etc
+		{"hello", "elloh\u200cay"},
+		{"eat", "eat\u200cway"},
+		{"by", "yb\u200cay"},
+		{"you", "ouy\u200cay"},
+		{"at", "at\u200cway"},
+		{"to", "ot\u200cay"},
+		{"world", "orldw\u200cay"},
+		{"apples", "apples\u200cway"},
+		{"hello world", "elloh\u200cay orldw\u200cay"},
+		{"Hello world", "Elloh\u200cay orldw\u200cay"},
+		{"Hello, world!", "Elloh\u200cay, orldw\u200cay!"},
+		{"I", "I\u200cway"},
 	}
 
-	for _, tt := range tests {
-		t.Run(fmt.Sprintf("%v to %v", tt.input, tt.output), func(t *testing.T) {
-			got, err := Encode(tt.input)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.output, got)
-		})
-	}
+	t.Run("Encode(string)", func(t *testing.T) {
+		for i, tt := range tests {
+			t.Run(fmt.Sprintf("test %v encode '%s' to '%s'", i, tt.input, tt.expect), func(t *testing.T) {
+				got, err := Encode(tt.input)
+				require.NoError(t, err)
+				assert.Equal(t, tt.expect, got)
+			})
+		}
+	})
+
+	t.Run("EncodeTo(string, io.Writer)", func(t *testing.T) {
+		for i, tt := range tests {
+			t.Run(fmt.Sprintf("test %v encode '%s' to '%s'", i, tt.input, tt.expect), func(t *testing.T) {
+				buf := bytes.NewBuffer(nil)
+				err := EncodeTo(tt.input, buf)
+				require.NoError(t, err)
+				assert.Equal(t, tt.expect, buf.String())
+			})
+		}
+	})
+
+	t.Run("(*Encoder).EncodeFromString(string)", func(t *testing.T) {
+		for i, tt := range tests {
+			t.Run(fmt.Sprintf("test %v encode '%s' to '%s'", i, tt.input, tt.expect), func(t *testing.T) {
+
+				buf := bytes.NewBuffer(nil)
+				pl, err := New(buf)
+				require.NoError(t, err)
+				require.NotNil(t, pl)
+
+				err = pl.EncodeFromString(tt.input)
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expect, buf.String())
+			})
+		}
+	})
+
+	t.Run("(*Encoder).Encode(io.Writer)", func(t *testing.T) {
+		for i, tt := range tests {
+			t.Run(fmt.Sprintf("test %v encode '%s' to '%s'", i, tt.input, tt.expect), func(t *testing.T) {
+				buf := bytes.NewBuffer(nil)
+				pl, err := New(buf)
+				require.NoError(t, err)
+				require.NotNil(t, pl)
+				read := strings.NewReader(tt.input)
+
+				err = pl.Encode(read)
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expect, buf.String(), "(*PigLatin).Encode(io.Reader)")
+			})
+		}
+	})
 }
 
 func TestPigLatin_IsLetter(t *testing.T) {

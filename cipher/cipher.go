@@ -13,10 +13,22 @@ import (
 // ENUM(piglatin, reverse)
 type EncoderType int32
 
-// Encoder
+// Encoder ...
 type Encoder interface {
 	EncodeFromString(string) error
 	Encode(io.Reader) error
+}
+
+// Decoder ...
+type Decoder interface {
+	DecodeString(string) error
+	Decode(io.Reader) error
+}
+
+// Handler ...
+type Handler interface {
+	Encoder
+	Decoder
 }
 
 // New ...

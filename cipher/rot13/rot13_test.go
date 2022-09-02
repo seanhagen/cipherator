@@ -10,81 +10,129 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRot13_Cipher_Encode(t *testing.T) {
+func TestRot13(t *testing.T) {
 	tests := []struct {
 		input, expect string
 	}{
+		{"hello", "uryyb"},
+		{"eat", "rng"},
+		{"by", "ol"},
+		{"world", "jbeyq"},
+		{"apples", "nccyrf"},
 		{"hello world", "uryyb jbeyq"},
+		{"Hello world", "Uryyb jbeyq"},
+		{"Hello, world!", "Uryyb, jbeyq!"},
 	}
 
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("test %v Encode(%v) => '%v'", i, tt.input, tt.expect), func(t *testing.T) {
-			got, err := Encode(tt.input)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expect, got)
+	t.Run("Encoding", func(t *testing.T) {
+		t.Run("Encode(string)", func(t *testing.T) {
+			for i, tt := range tests {
+				t.Run(fmt.Sprintf("test %v encode '%s' to '%s'", i, tt.input, tt.expect), func(t *testing.T) {
+					got, err := Encode(tt.input)
+					require.NoError(t, err)
+					assert.Equal(t, tt.expect, got)
+				})
+			}
 		})
-	}
-}
 
-func TestRot13_Cipher_EncodeTo(t *testing.T) {
-	tests := []struct {
-		input, expect string
-	}{
-		{"hello world", "uryyb jbeyq"},
-	}
-
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("test %v EncodeTo(%v, io.Writer) => '%v'", i, tt.input, tt.expect), func(t *testing.T) {
-			buf := bytes.NewBuffer(nil)
-			err := EncodeTo(tt.input, buf)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expect, buf.String())
+		t.Run("EncodeTo(string, io.Writer)", func(t *testing.T) {
+			for i, tt := range tests {
+				t.Run(fmt.Sprintf("test %v encode '%s' to '%s'", i, tt.input, tt.expect), func(t *testing.T) {
+					buf := bytes.NewBuffer(nil)
+					err := EncodeTo(tt.input, buf)
+					require.NoError(t, err)
+					assert.Equal(t, tt.expect, buf.String())
+				})
+			}
 		})
-	}
-}
 
-func TestRot13_Cipher_ObjEncodeFromString(t *testing.T) {
-	tests := []struct {
-		input, expect string
-	}{
-		{"hello world", "uryyb jbeyq"},
-	}
+		t.Run("(*Encoder).EncodeFromString(string)", func(t *testing.T) {
+			for i, tt := range tests {
+				t.Run(fmt.Sprintf("test %v encode '%s' to '%s'", i, tt.input, tt.expect), func(t *testing.T) {
 
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("test %v rot13.EncodeFromString(%v) => %v", i, tt.input, tt.expect), func(t *testing.T) {
-			buf := bytes.NewBuffer(nil)
-			rt, err := New(buf)
-			require.NotNil(t, rt)
-			require.NoError(t, err)
+					buf := bytes.NewBuffer(nil)
+					rt, err := New(buf)
+					require.NoError(t, err)
+					require.NotNil(t, rt)
 
-			err = rt.EncodeFromString(tt.input)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expect, buf.String())
+					err = rt.EncodeFromString(tt.input)
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expect, buf.String())
+				})
+			}
 		})
-	}
-}
 
-func TestRot13_Cipher_ObjEncode(t *testing.T) {
-	tests := []struct {
-		input, expect string
-	}{
-		{"hello world", "uryyb jbeyq"},
-	}
+		t.Run("(*Encoder).Encode(io.Writer)", func(t *testing.T) {
+			for i, tt := range tests {
+				t.Run(fmt.Sprintf("test %v encode '%s' to '%s'", i, tt.input, tt.expect), func(t *testing.T) {
+					buf := bytes.NewBuffer(nil)
+					rt, err := New(buf)
+					require.NoError(t, err)
+					require.NotNil(t, rt)
+					read := strings.NewReader(tt.input)
 
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("test %v rot13.EncodeFromString(%v) => %v", i, tt.input, tt.expect), func(t *testing.T) {
-			buf := bytes.NewBuffer(nil)
-			rt, err := New(buf)
-			require.NotNil(t, rt)
-			require.NoError(t, err)
-
-			input := strings.NewReader(tt.input)
-
-			err = rt.Encode(input)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expect, buf.String())
+					err = rt.Encode(read)
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expect, buf.String(), "(*PigLatin).Encode(io.Reader)")
+				})
+			}
 		})
-	}
+	})
+
+	t.Run("Decoding", func(t *testing.T) {
+		t.Run("Decode(string)", func(t *testing.T) {
+			for i, tt := range tests {
+				t.Run(fmt.Sprintf("test %v decode '%s' to '%s'", i, tt.expect, tt.input), func(t *testing.T) {
+					got, err := Decode(tt.expect)
+					require.NoError(t, err)
+					assert.Equal(t, tt.input, got)
+				})
+			}
+		})
+
+		t.Run("DecodeTo(string, io.Writer)", func(t *testing.T) {
+			for i, tt := range tests {
+				t.Run(fmt.Sprintf("test %v decode '%s' to '%s'", i, tt.expect, tt.input), func(t *testing.T) {
+					buf := bytes.NewBuffer(nil)
+					err := DecodeTo(tt.expect, buf)
+					require.NoError(t, err)
+					assert.Equal(t, tt.input, buf.String())
+				})
+			}
+		})
+
+		t.Run("(*Decoder).DecodeFromString(string)", func(t *testing.T) {
+			for i, tt := range tests {
+				t.Run(fmt.Sprintf("test %v decode '%s' to '%s'", i, tt.expect, tt.input), func(t *testing.T) {
+
+					buf := bytes.NewBuffer(nil)
+					rt, err := New(buf)
+					require.NoError(t, err)
+					require.NotNil(t, rt)
+
+					err = rt.DecodeString(tt.expect)
+					assert.NoError(t, err)
+					assert.Equal(t, tt.input, buf.String())
+				})
+			}
+		})
+
+		t.Run("(*Decoder).Decode(io.Writer)", func(t *testing.T) {
+			for i, tt := range tests {
+				t.Run(fmt.Sprintf("test %v decode '%s' to '%s'", i, tt.expect, tt.input), func(t *testing.T) {
+					buf := bytes.NewBuffer(nil)
+					rt, err := New(buf)
+					require.NoError(t, err)
+					require.NotNil(t, rt)
+					read := strings.NewReader(tt.expect)
+
+					err = rt.Decode(read)
+					assert.NoError(t, err)
+					assert.Equal(t, tt.input, buf.String(), "(*PigLatin).Decode(io.Reader)")
+				})
+			}
+		})
+	})
 }
 
 func TestRot13_EncodeFromRunes(t *testing.T) {
