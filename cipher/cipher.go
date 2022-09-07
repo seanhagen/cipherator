@@ -33,7 +33,7 @@ type Handler interface {
 }
 
 // New ...
-func New(t EncoderType, wr io.Writer) (Encoder, error) {
+func New(t EncoderType, wr io.Writer) (Handler, error) {
 	switch t {
 	case EncoderTypePiglatin:
 		return piglatin.New(wr)
