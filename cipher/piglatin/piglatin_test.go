@@ -11,7 +11,7 @@ import (
 )
 
 func TestPigLatin_Basics(t *testing.T) {
-	var pl *Encoder
+	var pl *Handler
 	var err error
 	buf := bytes.NewBuffer(nil)
 
@@ -75,7 +75,7 @@ func TestPigLatinEncoding(t *testing.T) {
 		}
 	})
 
-	t.Run("(*Encoder).Encode(io.Writer)", func(t *testing.T) {
+	t.Run("(*Encoder).Encode(io.Reader)", func(t *testing.T) {
 		for i, tt := range tests {
 			t.Run(fmt.Sprintf("test %v encode '%s' to '%s'", i, tt.input, tt.expect), func(t *testing.T) {
 				buf := bytes.NewBuffer(nil)
@@ -104,7 +104,7 @@ func TestPigLatin_IsLetter(t *testing.T) {
 		{'1', false},
 	}
 
-	pl := &Encoder{}
+	pl := &Handler{}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%c is letter %v", tt.input, tt.expect), func(t *testing.T) {
 			got := pl.isLetter(tt.input)
@@ -129,7 +129,7 @@ func TestPigLatin_IsVowel(t *testing.T) {
 		{' ', false},
 	}
 
-	pl := &Encoder{}
+	pl := &Handler{}
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%c is vowel %v", tt.input, tt.expect), func(t *testing.T) {
@@ -150,7 +150,7 @@ func TestPigLatin_IsUpper(t *testing.T) {
 		{' ', false},
 	}
 
-	pl := &Encoder{}
+	pl := &Handler{}
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v is uppercase %v", tt.input, tt.expect), func(t *testing.T) {
