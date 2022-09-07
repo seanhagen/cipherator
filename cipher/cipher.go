@@ -11,7 +11,7 @@ import (
 )
 
 // EncoderType ...
-// ENUM(piglatin, reverse)
+// ENUM(piglatin, rot13)
 type EncoderType int32
 
 // Encoder ...
