@@ -18,5 +18,5 @@ func TestCipher_GetEncoder(t *testing.T) {
 	enc, err = New(EncoderTypePiglatin, buf)
 
 	assert.NoError(t, err)
-	assert.IsType(t, &piglatin.Encoder{}, enc)
+	assert.IsType(t, &piglatin.Handler{}, enc)
 }

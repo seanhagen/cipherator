@@ -22,7 +22,7 @@ func TestPigLatin_IsZeroWidth(t *testing.T) {
 
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("test %v run '%c' expect %v", i, tt.inputRune, tt.expect), func(t *testing.T) {
-			enc := &Encoder{}
+			enc := &Handler{}
 
 			got := enc.isZeroWidth(tt.inputRune)
 			assert.Equal(t, tt.expect, got, "input rune '%c'", tt.inputRune)
