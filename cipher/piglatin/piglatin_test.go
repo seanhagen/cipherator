@@ -36,6 +36,8 @@ func TestPigLatinEncoding(t *testing.T) {
 		{"Hello world", "Elloh\u200cay orldw\u200cay"},
 		{"Hello, world!", "Elloh\u200cay, orldw\u200cay!"},
 		{"I", "I\u200cway"},
+		{"hello\n", "elloh\u200cay\n"},
+		{"DUKE OF ALBANY", "UKED\u200cAY OF\u200cWAY ALBANY\u200cWAY"},
 	}
 
 	t.Run("Encode(string)", func(t *testing.T) {

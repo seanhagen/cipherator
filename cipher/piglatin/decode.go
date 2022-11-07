@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"text/scanner"
-	"unicode"
+)
+
+const (
+	lengthOfPerfectVowelSuffix = 3
 )
 
 // Decode ...
@@ -26,56 +28,24 @@ func DecodeTo(in string, wr io.Writer) error {
 }
 
 // DecodeFromString  ...
-func (e *Encoder) DecodeString(in string) error {
+func (e *Handler) DecodeString(in string) error {
 	read := strings.NewReader(in)
 	return e.Decode(read)
 }
 
 // Decode  ...
-func (e *Encoder) Decode(r io.Reader) error {
-	scan := scanner.Scanner{}
-	scan.Init(r)
-	scan.Filename = "decoding"
-	scan.Whitespace ^= 1<<'\t' | 1<<' '
-	// tell the scanner to treat the zero width rune as part of a token, and not a separator
-	scan.IsIdentRune = e.scannerIsIdentRune
-
-	// start decoding tokens
+func (e *Handler) Decode(r io.Reader) error {
+	scan := e.getScanner(r)
 	return e.scanTokens(scan, e.decodeToken)
 }
 
-// scanTokens  ...
-func (e *Encoder) scanTokens(scan scanner.Scanner, process func(string) error) error {
-	for {
-		ch := scan.Scan()
-		if ch == scanner.EOF {
-			break
-		}
-
-		if err := process(scan.TokenText()); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// scannerIsIdentRune ...
-func (e *Encoder) scannerIsIdentRune(ch rune, i int) bool {
-	if i <= 1 {
-		// no numbers in the first two characters, or everything will probably explode
-		return (ch == zeroWidth || unicode.IsLetter(ch)) && !unicode.IsDigit(ch)
-	}
-	return ch == zeroWidth || unicode.IsLetter(ch)
-}
-
 // decodeString  ...
-func (e *Encoder) decodeToken(token string) error {
+func (e *Handler) decodeToken(token string) error {
 	if len(token) == 0 {
 		return nil
 	}
 
 	word, suffix, hasZW := e.splitToken(token)
-
 	if hasZW {
 		return e.decodePerfect(word, suffix)
 	}
@@ -83,7 +53,7 @@ func (e *Encoder) decodeToken(token string) error {
 }
 
 // splitToken ...
-func (e *Encoder) splitToken(token string) (word, suffix []rune, hasZW bool) {
+func (e *Handler) splitToken(token string) (word, suffix []rune, hasZW bool) {
 	// split our token into the runes making up the word, and the runes making up the suffix
 	for _, r := range token {
 		if e.isZeroWidth(r) {
@@ -101,13 +71,16 @@ func (e *Encoder) splitToken(token string) (word, suffix []rune, hasZW bool) {
 }
 
 // decodeBestGuess ...
-func (e *Encoder) decodeBestGuess(word []rune) error {
-	// wordFormat := "%c%s"
-	wl := len(word)
-	suffix := word[wl-3:]
-	word = word[:wl-3]
+func (e *Handler) decodeBestGuess(word []rune) error {
+	if len(word) == 1 {
+		return e.writeRunes(word)
+	}
 
-	if suffix[0] == e.defaultSuffix[0] {
+	wl := len(word)
+	suffix := word[wl-lengthOfPerfectVowelSuffix:]
+	word = word[:wl-lengthOfPerfectVowelSuffix]
+
+	if suffix[0] == e.suffix[0] {
 		word = append([]rune{'[', suffix[0], ']'}, word...)
 	} else {
 		word = append([]rune{suffix[0]}, word...)
@@ -117,8 +90,8 @@ func (e *Encoder) decodeBestGuess(word []rune) error {
 }
 
 // decodePerfect  ...
-func (e *Encoder) decodePerfect(word, suffix []rune) error {
-	if len(suffix) == 3 {
+func (e *Handler) decodePerfect(word, suffix []rune) error {
+	if len(suffix) == lengthOfPerfectVowelSuffix {
 		return e.writeRunes(word)
 	}
 
@@ -129,13 +102,8 @@ func (e *Encoder) decodePerfect(word, suffix []rune) error {
 	return e.writeRunes(word)
 }
 
-// wordStartsWithVowel  ...
-func (e *Encoder) suffixForWordStartingWithVowel(suffix []rune) bool {
-	return len(suffix) == 3
-}
-
 // writeRunes  ...
-func (e *Encoder) writeRunes(input []rune) error {
+func (e *Handler) writeRunes(input []rune) error {
 	b := strings.Builder{}
 	for _, r := range input {
 		if _, err := b.WriteRune(r); err != nil {
